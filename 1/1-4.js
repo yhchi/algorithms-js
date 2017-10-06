@@ -220,13 +220,3 @@ function colTrans(m1, m2) {
     r.ok = true;
     return r;
 }
-[
-    
-    
-    
-    
-    
-]
-[
-
-]
