@@ -10,111 +10,36 @@
 */
 
 function algorithm(m1, m2) {
-    var m,
-        row = m1.length,
+    var row = m1.length,
         col = m1[0].length,
-        step1 = 0,
-        step2 = Infinity,
-        n1, n2,
-        arr1 = [], arr2 = [],
-        arr3, arr4;
-    m1 = cpmatrix(m1);
+        m,
+        minStep = Infinity,
+        tempStep,
+        found = false;
     
-    // 翻转 1 个数不正确的行
-    for (var i = 0; i < row; i++) {
-        n1 = count(m1[i]);
-        n2 = count(m2[i]);
-        if (n1 !== n2) {
-            if (n1 + n2 === col) {
-                overturn(m1[i]);
-                step1++;
-                arr1.push(i);
-            } else {
-                return -1;
-            }
-        } else {
-            if (n1 + n2 === col) {
-                arr2.push(i);
-            } else {
-                arr1.push(i);
-            }
-        }
-    }
-    // 翻转剩余明显不正确的行
-    while (arr1.length) {
-        arr3 = [];
-        arr4 = [];
-        for (var i = 0; i < arr2.length; i++) {
-            var turned = false;
-            for (var j = 0; j < arr1.length; j++) {
-                n1 = count(xor(m1[arr1[j]], m1[arr2[i]]));
-                n2 = count(xor(m2[arr1[j]], m2[arr2[i]]));
-                if (n1 !== n2) {
-                    if (n1 + n2 !== col || turned) {
-                        return -1;
-                    } else {
-                        overturn(m1[arr2[i]]);
-                        step1++;
-                        turned = true;
-                    }
-                }
-            }
-            if (turned) {
-                arr3.push(arr2[i]);
-            } else {
-                arr4.push(arr2[i]);
-            }
-        }
-        arr1 = arr3;
-        arr2 = arr4;
-    }
-    
-    arr1 = new Array(row);
-    for (var i = 0; i < arr2.length; i++) {
-        arr1[arr2[i]] = true;
-    }
-    
-    /*
-      可能不止一个解, 遍历所有列, 找到最优解, 如:
-          0 1     1 0
-          0 1     1 0
-          0 1 --> 1 0
-          0 1     1 0
-          0 1     1 0
-      正确答案为 1, 而不是 5
-    */
-    var flag = false;   // 是否已经找到一个解
+    // 假设 m1 的第i列对应 m2 的第0列
     for (var i = 0; i < col; i++) {
         m = cpmatrix(m1);
-        n1 = 0;
-        var ok = true;
+        tempStep = 0;
         for (var j = 0; j < row; j++) {
             if (m2[j][0] !== m[j][i]) {
-                if (arr1[j]) {
-                    overturn(m[j]);
-                    n1++;
-                } else {
-                    ok = false;
-                    break;
-                }
+                overturn(m[j]);
+                tempStep++;
             }
         }
-        if (!ok) {
-            continue;
-        }
+        
         var r = colTrans(m, m2);
         if (r.ok) {
-            n2 = n1 + r.step;
-            if (!flag || n2 < step2) {
-                flag = true;
-                step2 = n2;
+            tempStep += r.step;
+            if (tempStep < minStep) {
+                found = true;
+                minStep = tempStep;
             }
         }
     }
     
-    if (flag)
-        return step1 + step2;
-    
+    if (found)
+        return minStep;
     return -1;
 }
 
@@ -140,23 +65,6 @@ function overturn(arr) {
         arr[i] = arr[i] ? 0 : 1;
     }
 }
-// 统计 1 的个数
-function count(arr) {
-    var n = 0;
-    for (var i = 0; i < arr.length; i++) {
-        if (arr[i])
-            n++;
-    }
-    return n;
-}
-// 两个数组异或
-function xor(arr1, arr2) {
-    var r = [];
-    for (var i = 0, len = Math.max(arr1.length, arr2.length); i < len; i++) {
-        r[i] = (arr1[i] && arr2[i]) || (!arr1[i] && !arr2[i]) ? 0 : 1;
-    }
-    return r;
-}
 // 对比两列是否相同
 function compareCol(m1, m2, col1, col2) {
     for (var i = 0; i < m1.length; i++) {
@@ -177,44 +85,28 @@ function swapCol(m, c1, c2) {
 // 将 m1 列变换为 m2
 function colTrans(m1, m2) {
     var col = m1[0].length,
-        swaped = false;
+        found = false;
         r = {
             ok: false,
             step: 0
         };
     for (var i = 0; i < col; i++) {
-        swaped = false;
+        found = false;
         for (var j = i; j < col; j++) {
             if (compareCol(m1, m2, j, i)) {
                 if (j === i) {
-                    swaped = true;
+                    found = true;
                 } else if (compareCol(m1, m2, j, j)) {
-                    /*
-                      如果 m1 的第j列已经正确, 不要和第i列交换, 如:
-                          2 4 1 3 3  --> 1 2 3 3 4
-                          
-                          1 0 0 0 0      0 1 0 0 0
-                          0 1 1 1 1      1 0 1 1 1
-                          1 1 1 0 0      1 1 0 0 1
-                          1 1 0 0 0      0 1 0 0 1
-                          0 1 1 0 0      1 0 0 0 1
-                          
-                      正确:           错误:
-                          1 4 2 3 3       1 4 2 3 3
-                          1 2 4 3 3       1 2 4 3 3
-                          1 2 3 3 4       1 2 3 4 3
-                                          1 2 3 3 4
-                    */
                     continue;
                 } else {
-                    swaped = true;
+                    found = true;
                     swapCol(m1, i, j);
                     r.step++;
                 }
                 break;
             }
         }
-        if (!swaped)
+        if (!found)
             return r;
     }
     r.ok = true;
