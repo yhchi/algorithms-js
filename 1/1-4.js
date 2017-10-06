@@ -14,7 +14,7 @@ function algorithm(m1, m2) {
         row = m1.length,
         col = m1[0].length,
         step1 = 0,
-        step2 = 0,
+        step2 = Infinity,
         n1, n2,
         arr1 = [], arr2 = [],
         arr3, arr4;
@@ -74,15 +74,25 @@ function algorithm(m1, m2) {
         arr1[arr2[i]] = true;
     }
     
+    /*
+      可能不止一个解, 遍历所有列, 找到最优解, 如:
+          0 1     1 0
+          0 1     1 0
+          0 1 --> 1 0
+          0 1     1 0
+          0 1     1 0
+      正确答案为 1, 而不是 5
+    */
+    var flag = false;   // 是否已经找到一个解
     for (var i = 0; i < col; i++) {
         m = cpmatrix(m1);
-        step2 = 0;
+        n1 = 0;
         var ok = true;
         for (var j = 0; j < row; j++) {
             if (m2[j][0] !== m[j][i]) {
                 if (arr1[j]) {
                     overturn(m[j]);
-                    step2++;
+                    n1++;
                 } else {
                     ok = false;
                     break;
@@ -94,9 +104,16 @@ function algorithm(m1, m2) {
         }
         var r = colTrans(m, m2);
         if (r.ok) {
-            return step1 + step2 + r.step;
+            n2 = n1 + r.step;
+            if (!flag || n2 < step2) {
+                flag = true;
+                step2 = n2;
+            }
         }
     }
+    
+    if (flag)
+        return step1 + step2;
     
     return -1;
 }
@@ -169,8 +186,28 @@ function colTrans(m1, m2) {
         swaped = false;
         for (var j = i; j < col; j++) {
             if (compareCol(m1, m2, j, i)) {
-                swaped = true;
-                if (j !== i) {
+                if (j === i) {
+                    swaped = true;
+                } else if (compareCol(m1, m2, j, j)) {
+                    /*
+                      如果 m1 的第j列已经正确, 不要和第i列交换, 如:
+                          2 4 1 3 3  --> 1 2 3 3 4
+                          
+                          1 0 0 0 0      0 1 0 0 0
+                          0 1 1 1 1      1 0 1 1 1
+                          1 1 1 0 0      1 1 0 0 1
+                          1 1 0 0 0      0 1 0 0 1
+                          0 1 1 0 0      1 0 0 0 1
+                          
+                      正确:           错误:
+                          1 4 2 3 3       1 4 2 3 3
+                          1 2 4 3 3       1 2 4 3 3
+                          1 2 3 3 4       1 2 3 4 3
+                                          1 2 3 3 4
+                    */
+                    continue;
+                } else {
+                    swaped = true;
                     swapCol(m1, i, j);
                     r.step++;
                 }
@@ -183,3 +220,13 @@ function colTrans(m1, m2) {
     r.ok = true;
     return r;
 }
+[
+    
+    
+    
+    
+    
+]
+[
+
+]
