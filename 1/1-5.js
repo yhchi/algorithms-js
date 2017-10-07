@@ -110,3 +110,13 @@ function correctTest() {
         }
     }
 }
+// 时间复杂度测试, 可验证确实为线性复杂度
+function timeTest(size) {
+    var arr = [];
+    for (var i = 0; i < size; i++) {
+        arr[i] = 10000 * Math.random();
+    }
+    var t1 = new Date();
+    var result = algorithm(arr);
+    return new Date() - t1;
+}
