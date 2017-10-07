@@ -87,3 +87,26 @@ function errorTest() {
         }
     }
 }
+// 结果正确性测试, 若第1个抽屉为空(从0开始), 如果初始设置不是 -Infinity, Infinity, 会导致结果错误
+function correctTest() {
+    var arr = [], size = 100;
+    for (var n = 0; n < 10000; n++) {
+        for (var i = 0; i < size; i++) {
+            arr[i] = 10000 * Math.random() - 5000;
+        }
+        var result = algorithm(arr);
+        arr.sort(function(a,b){return a-b});
+        var r = arr[1] - arr[0];
+        for (var i = 2; i < size; i++) {
+            if (arr[i]-arr[i-1] > r) {
+                r = arr[i]-arr[i-1];
+            }
+        }
+        if (result === r) {
+            // console.log('结果正确');
+        } else {
+            console.log('结果错误, 结果: '+ result + ' 应为: '+r);
+            return arr;
+        }
+    }
+}
