@@ -70,3 +70,20 @@ function getDrawer (arr) {
         n: n
     };
 }
+
+// 错误测试, 如果最大值放错, 最后一个抽屉是空的, 会尝试获取下一个抽屉的数据导致 error
+function errorTest() {
+    var arr = [], size = 100;
+    for (var n = 0; n < 10000; n++) {
+        for (var i = 0; i < size; i++) {
+            arr[i] = 10000 * Math.random() - 5000;
+        }
+        var result;
+        try {
+            result = algorithm(arr);
+        } catch (e) {
+            console.log('发生错误');
+            return getDrawer(arr);
+        }
+    }
+}
