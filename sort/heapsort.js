@@ -38,32 +38,4 @@ var heapsort = (function () {
     return heapsort;
 })();
 
-
-function test(size) {
-    var time1 = 0, time2 = 0;
-    size = size || 100;
-    function fn(a, b) {
-        return a-b;
-    }
-    for (var i = 0; i < 100; i++) {
-        var arr1 = new Array(Math.floor(Math.random()*size+size/2)),
-            arr2 = new Array(arr1.length),
-            arr = new Array(arr1.length);
-        for (var j = 0; j < arr1.length; j++) {
-            arr[j] = arr1[j] = arr2[j] = Math.random()*1000-500;
-        }
-        var t = new Date();
-        heapsort(arr1, fn);
-        time1 += new Date() -t;
-        t = new Date();
-        arr2.sort(fn);
-        time2 += new Date() -t;
-        for (var j = 0; j < arr1.length; j++) {
-            if (arr1[i] !== arr2[i]) {
-                console.log('错误');
-                return arr;
-            }
-        }
-    }
-    console.log('正确, heapsort: '+time1/100+' arr.sort: '+time2/100);
-}
+exports = module.exports = heapsort;
