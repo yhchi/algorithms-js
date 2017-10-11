@@ -7,7 +7,7 @@ var mergesort = (function(){
             choose = false;
         
         while (p1 <= mid && p2 <= right) {
-            choose = fn ? fn(source[p1], source[p2]) < 0 : source[p1] <= source[p2];
+            choose = fn ? fn(source[p1], source[p2]) <= 0 : source[p1] <= source[p2];
             target[index++] = choose ? source[p1++] : source[p2++];
         }
         while (p1 <= mid) {
