@@ -21,7 +21,7 @@ var mergesort = (function(){
     function mergesort(arr, fn) {
         var len = arr.length,
             arrA = arr,
-            arrB = new Array(len),
+            arrB = new arr.constructor(len),
             temp,
             left, right, mid;
         for (var i = 1; i < len; i *= 2) {
