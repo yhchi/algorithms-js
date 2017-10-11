@@ -20,6 +20,22 @@ var quicksort = (function () {
             }
         }
     }
+    
+    function insertion(arr, left, right, fn) {
+        var pos = left+1,
+            i, tmp;
+        for (; pos < right; pos++) {
+            i = pos;
+            tmp = arr[pos];
+            for (; i > left && (fn ? fn(arr[i-1], tmp) > 0 : arr[i-1]>tmp); i--) {
+                arr[i] = arr[i-1];
+            }
+            if (i !== pos) {
+                arr[i] = tmp;
+            }
+        }
+    }
+    
     function partition(arr, left, right, fn) {
         var pivot = left + Math.floor((right-left)*Math.random());
         right--;
