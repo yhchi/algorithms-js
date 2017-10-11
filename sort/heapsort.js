@@ -10,13 +10,13 @@ var heapsort = (function () {
             }
             if (fn ? fn(arr[child], temp) > 0 : arr[child] > temp) {
                 arr[pos] = arr[child];
-                arr[child] = temp;
                 pos = child;
                 child = pos * 2 + 1;
             } else {
                 break;
             }
         }
+        arr[pos] = temp;
     }
     
     function heapsort(arr, fn) {
