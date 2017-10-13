@@ -36,7 +36,7 @@ var AVLTree = (function () {
     
     AVLTree.prototype = {
         search: function(key, fn) {
-            fn = fn || this.fn;
+            fn = fn || this.searchfn || this.insertfn;
             return search(this.top, key, fn);
         },
     };
