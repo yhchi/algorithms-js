@@ -1,21 +1,90 @@
 var AVLTree = (function () {
+    console.log(1);
     function Node(element) {
         this.element = element;
         this.height = 0;
         this.left = null;
         this.right = null;
-        this.count = 1;
     }
     
     function search(node, key, fn) {
+        if (!node)
+            return null;
         var elem = node.element;
-        if (fn ? fn(elem, key) > 0 : elem > key) {
+        if (fn ? fn(key, elem) < 0 : key < elem) {
             return node.left ? search(node.left, key, fn) : null;
-        } else if (fn ? fn(elem, key) < 0 : elem < key) {
+        } else if (fn ? fn(key, elem) > 0 : key > elem) {
             return node.right ? search(node.right, key, fn) : null;
         } else {
-            return node.count ? elem : null;
+            return elem;
         }
+    }
+    
+    function height(node) {
+        return node ? node.height : -1;
+    }
+    function rotateLeft(node) {
+        var left = node.left;
+        if (height(left.left) < height(left.right)) {
+            left.height--;
+            left.right.height++;
+            node.left = left.right;
+            left.right = node.left.left;
+            node.left.left = left;
+            left = node.left;
+        }
+        node.height--;
+        node.left = left.right;
+        left.right = node;
+        return left;
+    }
+    function rotateRight(node) {
+        var right = node.right;
+        if (height(right.right) < height(right.left)) {
+            right.height--;
+            right.left.height++;
+            node.right = right.left;
+            right.left = node.right.right;
+            node.right.right = right;
+            right = node.right;
+        }
+        node.height--;
+        node.right = right.left;
+        right.left = node;
+        return right;
+    }
+    function insert(node, element, fn) {
+        var elem = node.element;
+        if (fn ? fn(element, elem) < 0 : element < elem) {
+            if (node.left) {
+                node.left = insert(node.left, element, fn);
+                if (height(node.left) - height(node.right) === 2) {
+                    node = rotateLeft(node);
+                } else if (node.left.height === node.height) {
+                    node.height++;
+                }
+            } else {
+                node.left = new Node(element);
+                if (!node.right) {
+                    node.height++;
+                }
+            }
+        } else if (fn ? fn(element, elem) > 0 : element > elem) {
+            if (node.right) {
+                node.right = insert(node.right, element, fn);
+                if (height(node.right) - height(node.left) === 2) {
+                    node = rotateRight(node);
+                } else if (node.right.height === node.height) {
+                    node.height++;
+                }
+            } else {
+                node.right = new Node(element);
+                if (!node.left) {
+                    node.height++;
+                }
+            }
+        }
+        return node;
     }
     
     function AVLTree(arr, fn, fn2) {
@@ -29,7 +98,7 @@ var AVLTree = (function () {
         this.top = null;
         if (arr) {
             for (var i = 0; i < arr.length; i++) {
-                // this.insert(arr[i]);
+                 this.insert(arr[i]);
             }
         }
     }
@@ -39,41 +108,26 @@ var AVLTree = (function () {
             fn = fn || this.searchfn || this.insertfn;
             return search(this.top, key, fn);
         },
+        insert: function(element) {
+            if (this.top) {
+                this.top = insert(this.top, element, this.insertfn);
+            } else {
+                this.top = new Node(element);
+            }
+        }
     };
     
     return AVLTree;
 })();
 
-var a = {
-    height: 0,
-    element: {
+var tree = new AVLTree([{
         code: 1,
         word: 'hello',
-    },
-    count: 1,
-    left: null,
-    right: null,
-};
-var b = {
-    height: 0,
-    element: {
+    },{
         code: 3,
         word: 'hi',
-    },
-    count: 1,
-    left: null,
-    right: null,
-};
-var c = {
-    height: 1,
-    element: {
+    },{
         code: 2,
         word: 'good',
-    },
-    count: 1,
-    left: a,
-    right: b,
-};
-var tree = new AVLTree();
-tree.top = c;
-tree.search(3, (e, k) => e.code - k);
+    }], (a, b) => a.code - b.code, (k, e) => k - e.code);
+tree.search(3);
