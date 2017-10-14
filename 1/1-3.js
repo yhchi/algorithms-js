@@ -37,7 +37,7 @@ function factorization(num) {
     test(2);
     test(3);
     // 除 2、3 外质数只可能是 6n ± 1
-    for (; i < sqrt; i+=6) {
+    for (; i <= sqrt+6; i+=6) {
         test(i-1);
         test(i+1);
     }
