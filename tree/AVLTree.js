@@ -1,5 +1,4 @@
 var AVLTree = (function () {
-    console.log(1);
     function Node(element) {
         this.element = element;
         this.height = 0;
@@ -53,6 +52,7 @@ var AVLTree = (function () {
         right.left = node;
         return right;
     }
+    
     function insert(node, element, fn) {
         var elem = node.element;
         if (fn ? fn(element, elem) < 0 : element < elem) {
@@ -87,6 +87,70 @@ var AVLTree = (function () {
         return node;
     }
     
+    function delMin(node) {
+        if (node.left) {
+            node.left = delMin(node.left);
+            if (height(node.right) - height(node.left) === 2) {
+                node.height--;
+                node = rotateRight(node);
+            } else if (height(node.right) === height(node.left) && node.height - height(node.left) === 2) {
+                node.height--;
+            }
+        } else {
+            node = node.right;
+        }
+        return node;
+    }
+    function delNode(node) {
+        if (!node.left) {
+            if (!node.right) {
+                node = null;
+            } else {
+                node = node.right;
+            }
+        } else if (!node.right) {
+            node = node.left;
+        } else {
+            var minNode = node.right;
+            while(minNode.left) {
+                minNode = minNode.left;
+            }
+            node.element = minNode.element;
+            node.right = delMin(node.right);
+            node.height = Math.max(height(node.left), height(node.right)) + 1;
+        }
+        return node;
+    }
+    function del(node, key, fn) {
+        if (!node)
+            return null;
+        var elem = node.element;
+        if (fn ? fn(key, elem) < 0 : key < elem) {
+            if (node.left) {
+                node.left = del(node.left, key, fn);
+                if (height(node.right) - height(node.left) === 2) {
+                    node.height--;
+                    node = rotateRight(node);
+                } else if (height(node.right) === height(node.left) && node.height - height(node.left) === 2) {
+                    node.height--;
+                }
+            }
+        } else if (fn ? fn(key, elem) > 0 : key > elem) {
+            if (node.right) {
+                node.right = del(node.right, key, fn);
+                if (height(node.left) - height(node.right) === 2) {
+                    node.height--;
+                    node = rotateLeft(node);
+                } else if (height(node.right) === height(node.left) && node.height - height(node.left) === 2) {
+                    node.height--;
+                }
+            }
+        } else {
+            node = delNode(node);
+        }
+        return node;
+    }
+    
     function AVLTree(arr, fn, fn2) {
         if (typeof arr === 'function') {
             fn2 = fn;
@@ -114,6 +178,10 @@ var AVLTree = (function () {
             } else {
                 this.top = new Node(element);
             }
+        },
+        delete: function(key, fn) {
+            fn = fn || this.searchfn || this.insertfn;
+            this.top = del(this.top, key, fn);
         }
     };
     
