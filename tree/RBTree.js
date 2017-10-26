@@ -375,3 +375,33 @@ var RBTree = (function () {
     
     return RBTree;
 })();
+
+function RBTreeTest() {
+    var tree = new RBTree(),
+        arr = [], str = '';
+    for (var i = 0; i < 5000; i++) {
+        var x = Math.floor(Math.random()*1000);
+        if (Math.random() < 0.7) {
+            tree.insert(x);
+            if (arr.indexOf(x) < 0)
+                arr.push(x);
+            str += 'insert('+x+');\n';
+        } else {
+            tree.delete(x);
+            var ind = arr.indexOf(x);
+            if (ind >= 0)
+                arr.splice(ind, 1);
+            str += 'del('+x+');\n';
+        }
+    }
+    var s1 = '', s2 = '';
+    tree.inorder((elem)=>{s1+=elem+','});
+    s2 = arr.sort((a,b)=>a-b).join(',')+',';
+    if (s1 !== s2) {
+        console.log(s1);
+        console.log(s2);
+        console.log(str);
+    } else {
+        console.log('正确');
+    }
+}
