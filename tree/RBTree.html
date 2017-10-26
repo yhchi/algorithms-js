@@ -17,11 +17,12 @@
                 left: 0;
                 top: 0;
                 width: 200px;
-                height: 100px;
+                height: 110px;
                 background: rgba(238, 238, 238, 0.5);
             }
             #panel .btns {
                 text-align: center;
+                margin: 5px auto;
             }
             #ctr {
                 width: 100%;
@@ -35,7 +36,7 @@
             }
             #val {
                 display: block;
-                margin: 10px auto;
+                margin: 5px auto;
                 width: 150px;
             }
         </style>
@@ -48,6 +49,10 @@
             <div class="btns">
                 <input id="in_btn" class="btn" type="button" value="插入">
                 <input id="del_btn" class="btn" type="button" value="删除">
+            </div>
+            <div class="btns">
+                <input id="empty_btn" class="btn" type="button" value="清空">
+                <input id="rand_btn" class="btn" type="button" value="随机">
             </div>
         </div>
         <script src="RBTree.js"></script>
@@ -73,7 +78,7 @@
                 x = x < 0 ? 0 : x;
                 x = x > oCanvas.width-200 ? oCanvas.width-200 : x;
                 y = y < 0 ? 0 : y;
-                y = y > oCanvas.height-100 ? oCanvas.height-100 : y;
+                y = y > oCanvas.height-110 ? oCanvas.height-110 : y;
                 panel.style.left = x + 'px';
                 panel.style.top = y + 'px';
             }
@@ -84,7 +89,7 @@
                 x = x < 0 ? 0 : x;
                 x = x > oCanvas.width-200 ? oCanvas.width-200 : x;
                 y = y < 0 ? 0 : y;
-                y = y > oCanvas.height-100 ? oCanvas.height-100 : y;
+                y = y > oCanvas.height-110 ? oCanvas.height-110 : y;
                 p.x = x;
                 p.y = y;
             }
@@ -101,8 +106,8 @@
                     p.x = oCanvas.width-200;
                     panel.style.left = p.x + 'px';
                 }
-                if (p.y > oCanvas.height-100) {
-                    p.y = oCanvas.height-100;
+                if (p.y > oCanvas.height-110) {
+                    p.y = oCanvas.height-110;
                     panel.style.top = p.y + 'px';
                 }
             }
@@ -216,6 +221,8 @@
             
             var inbtn = document.getElementById('in_btn'),
                 delbtn = document.getElementById('del_btn'),
+                emptybtn = document.getElementById('empty_btn'),
+                randbtn = document.getElementById('rand_btn'),
                 val = document.getElementById('val');
             inbtn.onclick = function() {
                 var num = parseFloat(val.value);
@@ -231,6 +238,11 @@
                     draw();
                 }
             }
+            emptybtn.onclick = function() {
+                tree.top = null;
+                draw();
+            }
+            randbtn.onclick = rand;
         </script>
     </body>
 </html>
