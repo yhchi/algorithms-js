@@ -303,6 +303,7 @@ var RBTree = (function () {
                 } else {
                     P.element = X.element;
                     P.right = null;
+                    return;
                 }
             }
             while (1) {
