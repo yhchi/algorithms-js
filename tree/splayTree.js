@@ -147,7 +147,7 @@ var SplayTree = (function() {
             var top = this.top,
                 left = top.left,
                 right = top.right,
-                relation = fn(element, top.element);
+                relation = fn(key, top.element);
             if (relation == 0) {
                 if (!left) {
                     this.top = right;
