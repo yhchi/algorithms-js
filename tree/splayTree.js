@@ -23,6 +23,28 @@ var SpalyTree = (function() {
         return right;
     }
     
+    function LDR(node, fn) {
+        if (node.left)
+            LDR(node.left, fn);
+        fn(node.element, node);
+        if (node.right)
+            LDR(node.right, fn);
+    }
+    function DLR(node, fn) {
+        fn(node.element, node);
+        if (node.left)
+            DLR(node.left, fn);
+        if (node.right)
+            DLR(node.right, fn);
+    }
+    function LRD(node, fn) {
+        if (node.left)
+            LRD(node.left, fn);
+        if (node.right)
+            LRD(node.right, fn);
+        fn(node.element, node);
+    }
+    
     function SplayTree() {
         if (typeof arr === 'function') {
             fn2 = fn;
@@ -135,6 +157,21 @@ var SpalyTree = (function() {
                     this.top.right = right;
                 }
             }
+        },
+        // 中序遍历
+        inorder: function(fn) {
+            if (this.top)
+                LDR(this.top, fn);
+        },
+        // 前序遍历 / 先根遍历
+        preorder: function(fn) {
+            if (this.top)
+                DLR(this.top, fn);
+        },
+        // 后序遍历 / 后根遍历
+        postorder: function(fn) {
+            if (this.top)
+                LRD(this.top, fn);
         },
     };
     
