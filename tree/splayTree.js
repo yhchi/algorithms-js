@@ -1,0 +1,142 @@
+var SpalyTree = (function() {
+    function compare(a, b) {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+    }
+    function Node(element) {
+        this.element = element;
+        this.left = null;
+        this.right = null;
+    }
+    
+    function getLeft(left) {
+        while(left.right) {
+            left = left.right;
+        }
+        return left;
+    }
+    function getRight(right) {
+        while(right.left) {
+            right = right.left;
+        }
+        return right;
+    }
+    
+    function SplayTree() {
+        if (typeof arr === 'function') {
+            fn2 = fn;
+            fn = arr;
+            arr = undefined;
+        }
+        this.insertfn = fn || compare;
+        this.searchfn = fn2 || this.insertfn;
+        this.top = null;
+        if (arr) {
+            for (var i = 0; i < arr.length; i++) {
+                 this.insert(arr[i]);
+            }
+        }
+    }
+    
+    SplayTree.prototype = {
+        search(key, fn) {
+            if (!this.top)
+                return null;
+            fn = fn || this.searchfn;
+            var leftRoot = new Node(null),
+                rightRoot = new Node(null),
+                left = leftRoot,
+                right = rightRoot;
+            var P = this.top, X, C,
+                relation, relation2;
+            while (P) {
+                relation = fn(key, P.element);
+                X = relation < 0 ? P.left : P.right;
+                if (relation == 0 || !X) {
+                    left.right = P.left;
+                    right.left = P.right;
+                    P.left = leftRoot.right;
+                    P.right = rightRoot.left;
+                    this.top = P;
+                    P = null;
+                } else {
+                    relation2 = fn(key, X.element);
+                    C = relation2 < 0 ? X.left : X.right;
+                    if (relation < 0) {
+                        if (relation2 == 0 || !C || relation2 > 0) {
+                            P.left = null;
+                            right.left = P;
+                            right = getRight(right);
+                            P = X;
+                        } else {
+                            P.left = X.right;
+                            X.left = null;
+                            X.right = P;
+                            right.left = X;
+                            right = getRight(right);
+                            P = C;
+                        }
+                    } else {
+                        if (relation2 == 0 || !C || relation2 < 0) {
+                            P.right = null;
+                            left.right = P;
+                            left = getLeft(left);
+                            P = X;
+                        } else {
+                            P.right = X.left;
+                            X.right = null;
+                            X.left = P;
+                            left.right = X;
+                            left = getLeft(left);
+                            P = C;
+                        }
+                    }
+                }
+            }
+            return fn(key, this.top.element) == 0 ? this.top.element : null;
+        },
+        insert: function(element) {
+            if (!this.top) {
+                this.top = new Node(element, false);
+            } else {
+                this.search(element, this.insertfn);
+                var relation = this.insertfn(element, this.top.element);
+                if (relation == 0) {
+                    this.top.element = element;
+                } else {
+                    var node = new Node(element);
+                    if (relation < 0) {
+                        node.left = this.top.left;
+                        node.right = this.top;
+                        this.top.left = null;
+                    } else {
+                        node.left = this.top;
+                        node.right = this.top.right;
+                        this.top.right = null;
+                    }
+                    this.top = node;
+                }
+            }
+        },
+        delete: function(key, fn) {
+            fn = fn || this.searchfn;
+            this.search(key, fn);
+            var top = this.top,
+                left = top.left,
+                right = top.right,
+                relation = fn(element, top.element);
+            if (relation == 0) {
+                if (!left) {
+                    this.top = right;
+                } else {
+                    this.top = left;
+                    this.search(key, fn);
+                    this.top.right = right;
+                }
+            }
+        },
+    };
+    
+    return SplayTree;
+})();
