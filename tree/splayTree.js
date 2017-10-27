@@ -45,7 +45,7 @@ var SplayTree = (function() {
         fn(node.element, node);
     }
     
-    function SplayTree() {
+    function SplayTree(arr, fn, fn2) {
         if (typeof arr === 'function') {
             fn2 = fn;
             fn = arr;
