@@ -142,6 +142,8 @@ var SplayTree = (function() {
             }
         },
         delete: function(key, fn) {
+            if (!this.top)
+                return;
             fn = fn || this.searchfn;
             this.search(key, fn);
             var top = this.top,
