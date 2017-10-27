@@ -1,4 +1,4 @@
-var SpalyTree = (function() {
+var SplayTree = (function() {
     function compare(a, b) {
         if (a < b) return -1;
         if (a > b) return 1;
