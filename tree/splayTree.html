@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="renderer" content="webkit">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>伸展树演示</title>
+        <style>
+            body {
+                margin: 0;
+            }
+            #canvas {
+                display: block;
+            }
+            #panel {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 200px;
+                height: 110px;
+                background: rgba(238, 238, 238, 0.5);
+            }
+            #panel .btns {
+                text-align: center;
+                margin: 5px auto;
+            }
+            #ctr {
+                width: 100%;
+                height: 20px;
+                background: rgba(14, 202, 247, 0.5);
+            }
+            #ctr:before {
+                content: '控制面板 - 可拖动';
+                font-size: 14px;
+                margin-left: 10px;
+            }
+            #val {
+                display: block;
+                margin: 5px auto;
+                width: 150px;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <div id="panel">
+            <div id="ctr"></div>
+            <input id="val" type="text" placeholder="请输入数字">
+            <div class="btns">
+                <input id="in_btn" class="btn" type="button" value="插入">
+                <input id="del_btn" class="btn" type="button" value="删除">
+            </div>
+            <div class="btns">
+                <input id="empty_btn" class="btn" type="button" value="清空">
+                <input id="rand_btn" class="btn" type="button" value="随机">
+            </div>
+        </div>
+        <script src="splayTree.js"></script>
+        <script>
+            var ctr = document.getElementById('ctr'),
+                panel = document.getElementById('panel'),
+                p = {x: 0, y: 0},
+                p1 = {x: 0, y: 0},
+                p2 = {x: 0, y: 0},
+                moving = false;
+            ctr.onmousedown = function(e) {
+                moving = true;
+                p1.x = e.clientX;
+                p1.y = e.clientY;
+            }
+            document.onmousemove = function(e) {
+                if (!moving)
+                    return;
+                p2.x = e.clientX - p1.x,
+                p2.y = e.clientY - p1.y;
+                var x = p.x+p2.x,
+                    y = p.y+p2.y;
+                x = x < 0 ? 0 : x;
+                x = x > oCanvas.width-200 ? oCanvas.width-200 : x;
+                y = y < 0 ? 0 : y;
+                y = y > oCanvas.height-110 ? oCanvas.height-110 : y;
+                panel.style.left = x + 'px';
+                panel.style.top = y + 'px';
+            }
+            document.onmouseup = function (e) {
+                moving = false;
+                var x = p.x+p2.x,
+                    y = p.y+p2.y;
+                x = x < 0 ? 0 : x;
+                x = x > oCanvas.width-200 ? oCanvas.width-200 : x;
+                y = y < 0 ? 0 : y;
+                y = y > oCanvas.height-110 ? oCanvas.height-110 : y;
+                p.x = x;
+                p.y = y;
+            }
+            
+            var oCanvas = document.getElementById('canvas'),
+                ctx = oCanvas.getContext('2d'),
+                xunit = 45, yunit = 50, h_width;
+            function resizeHandler() {
+                oCanvas.width = window.innerWidth;
+                oCanvas.height = window.innerHeight;
+                h_width = oCanvas.width/2;
+                draw();
+                if (p.x > oCanvas.width-200) {
+                    p.x = oCanvas.width-200;
+                    panel.style.left = p.x + 'px';
+                }
+                if (p.y > oCanvas.height-110) {
+                    p.y = oCanvas.height-110;
+                    panel.style.top = p.y + 'px';
+                }
+            }
+            window.onresize = resizeHandler;
+            
+            var tree = new SplayTree(function(a, b) {
+                return a.num - b.num;
+            }, function(key, elem) {
+                return key - elem.num;
+            });
+            
+            resizeHandler();
+            
+            function updateW(elem, node) {
+                if (!node.left) {
+                    if (!node.right)
+                        elem.width = 1;
+                    else
+                        elem.width = node.right.element.width + 0.5;
+                } else {
+                    if (!node.right)
+                        elem.width = node.left.element.width + 0.5;
+                    else
+                        elem.width = node.left.element.width + node.right.element.width;
+                }
+            }
+            function updateP(elem, node) {
+                if (node.left) {
+                    elem.x += node.left.element.width - elem.width/2;
+                    node.left.element.x = elem.x - node.left.element.width/2;
+                    node.left.element.y = elem.y+1;
+                }
+                if (node.right) {
+                    if (!node.left)
+                        elem.x -= node.right.element.width - elem.width/2;
+                    node.right.element.x = elem.x + node.right.element.width/2;
+                    node.right.element.y = elem.y+1;
+                }
+            }
+            function drawNode(elem, node) {
+                ctx.save();
+                if (node.left) {
+                    ctx.beginPath();
+                    ctx.moveTo(h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                    ctx.lineTo(h_width+node.left.element.x*xunit, (0.5+node.left.element.y)*yunit);
+                    ctx.stroke();
+                }
+                if (node.right) {
+                    ctx.beginPath();
+                    ctx.moveTo(h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                    ctx.lineTo(h_width+node.right.element.x*xunit, (0.5+node.right.element.y)*yunit);
+                    ctx.stroke();
+                }
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(h_width+elem.x*xunit, (0.5+elem.y)*yunit,xunit/3,0,2*Math.PI);
+                ctx.stroke();
+                ctx.fillStyle="#fff";
+                ctx.fill();
+                ctx.fillStyle="#000";
+                ctx.textAlign = 'center';
+                ctx.textBaseline= 'middle';
+                ctx.font="14px Arial";
+                ctx.fillText(elem.num,h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                ctx.restore();
+            }
+            function insert(num) {
+                tree.insert({
+                    num: num,
+                    width: 1,
+                    x: 0,
+                    y: 0
+                });
+            }
+            function del(num) {
+                tree.delete(num);
+            }
+            function draw() {
+                ctx.clearRect(0,0,oCanvas.width,oCanvas.height);
+                tree.postorder(updateW);
+                if (tree.top) {
+                    tree.top.element.x = 0;
+                    tree.top.element.y = 0;
+                }
+                tree.preorder(updateP);
+                tree.preorder(drawNode);
+            }
+            
+            var str = '';
+            function rand() {
+                tree.top = null;
+                str = '';
+                for (var i = 0; i < 100; i++) {
+                    var x = Math.floor(Math.random()*50);
+                    if (Math.random() < 0.7) {
+                        insert(x);
+                        str += 'insert('+x+');\n';
+                    } else {
+                        del(x);
+                        str += 'del('+x+');\n';
+                    }
+                }
+                draw();
+            }
+            rand();
+            
+            var inbtn = document.getElementById('in_btn'),
+                delbtn = document.getElementById('del_btn'),
+                emptybtn = document.getElementById('empty_btn'),
+                randbtn = document.getElementById('rand_btn'),
+                val = document.getElementById('val');
+            inbtn.onclick = function() {
+                var num = parseFloat(val.value);
+                if (!isNaN(num)) {
+                    insert(num);
+                    draw();
+                }
+            }
+            delbtn.onclick = function() {
+                var num = parseFloat(val.value);
+                if (!isNaN(num)) {
+                    del(num);
+                    draw();
+                }
+            }
+            emptybtn.onclick = function() {
+                tree.top = null;
+                draw();
+            }
+            randbtn.onclick = rand;
+        </script>
+    </body>
+</html>
