@@ -31,6 +31,9 @@ var AVLTree = (function () {
             left.right = node.left.left;
             node.left.left = left;
             left = node.left;
+        } else if (height(left.left) === height(left.right)) {
+            left.height++;
+            node.height++;
         }
         node.height--;
         node.left = left.right;
@@ -46,6 +49,9 @@ var AVLTree = (function () {
             right.left = node.right.right;
             node.right.right = right;
             right = node.right;
+        } else if (height(right.left) === height(right.right)) {
+            right.height++;
+            node.height++;
         }
         node.height--;
         node.right = right.left;
@@ -117,7 +123,12 @@ var AVLTree = (function () {
             }
             node.element = minNode.element;
             node.right = delMin(node.right);
-            node.height = Math.max(height(node.left), height(node.right)) + 1;
+            if (height(node.left) - height(node.right) === 2) {
+                node.height--;
+                node = rotateLeft(node);
+            } else if (height(node.right) === height(node.left) && node.height - height(node.left) === 2) {
+                node.height--;
+            }
         }
         return node;
     }
@@ -224,20 +235,6 @@ var AVLTree = (function () {
     
     return AVLTree;
 })();
-
-/*
-var tree = new AVLTree([{
-        code: 1,
-        word: 'hello',
-    },{
-        code: 3,
-        word: 'hi',
-    },{
-        code: 2,
-        word: 'good',
-    }], (a, b) => a.code - b.code, (k, e) => k - e.code);
-tree.search(3);
-*/
 
 function AVLTreeTest() {
     var tree = new AVLTree(),
