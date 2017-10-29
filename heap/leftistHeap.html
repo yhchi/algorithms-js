@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="renderer" content="webkit">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>左式堆演示</title>
+        <style>
+            body {
+                margin: 0;
+            }
+            #canvas {
+                display: block;
+            }
+            #panel {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 250px;
+                height: 140px;
+                background: rgba(238, 238, 238, 0.5);
+            }
+            #panel .btns {
+                text-align: center;
+                margin: 5px auto;
+            }
+            #ctr {
+                width: 100%;
+                height: 20px;
+                background: rgba(14, 202, 247, 0.5);
+            }
+            #ctr:before {
+                content: '控制面板 - 可拖动';
+                font-size: 14px;
+                margin-left: 10px;
+            }
+            #val {
+                display: block;
+                margin: 5px auto;
+                width: 150px;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <div id="panel">
+            <div id="ctr"></div>
+            <input id="val" type="text" placeholder="请输入数字">
+            <div class="btns">
+                <input id="insert1" class="btn" type="button" value="插入1">
+                <input id="del1" class="btn" type="button" value="delMin1">
+                <input id="clear1" class="btn" type="button" value="清空1">
+                <input id="rand1" class="btn" type="button" value="随机1">
+            </div>
+            <div class="btns">
+                <input id="insert2" class="btn" type="button" value="插入2">
+                <input id="del2" class="btn" type="button" value="delMin2">
+                <input id="clear2" class="btn" type="button" value="清空2">
+                <input id="rand2" class="btn" type="button" value="随机2">
+            </div>
+            <div class="btns"><input id="merge" class="btn" type="button" value="合并"></div>
+        </div>
+        <script src="leftistHeap.js"></script>
+        <script>
+            var ctr = document.getElementById('ctr'),
+                panel = document.getElementById('panel'),
+                p = {x: 0, y: 0},
+                p1 = {x: 0, y: 0},
+                p2 = {x: 0, y: 0},
+                moving = false;
+            ctr.onmousedown = function(e) {
+                moving = true;
+                p1.x = e.clientX;
+                p1.y = e.clientY;
+            }
+            document.onmousemove = function(e) {
+                if (!moving)
+                    return;
+                p2.x = e.clientX - p1.x,
+                p2.y = e.clientY - p1.y;
+                var x = p.x+p2.x,
+                    y = p.y+p2.y;
+                x = x < 0 ? 0 : x;
+                x = x > oCanvas.width-250 ? oCanvas.width-250 : x;
+                y = y < 0 ? 0 : y;
+                y = y > oCanvas.height-140 ? oCanvas.height-140 : y;
+                panel.style.left = x + 'px';
+                panel.style.top = y + 'px';
+            }
+            document.onmouseup = function (e) {
+                moving = false;
+                var x = p.x+p2.x,
+                    y = p.y+p2.y;
+                x = x < 0 ? 0 : x;
+                x = x > oCanvas.width-250 ? oCanvas.width-250 : x;
+                y = y < 0 ? 0 : y;
+                y = y > oCanvas.height-140 ? oCanvas.height-140 : y;
+                p.x = x;
+                p.y = y;
+            }
+            
+            var oCanvas = document.getElementById('canvas'),
+                ctx = oCanvas.getContext('2d'),
+                xunit = 45, yunit = 50, h_width;
+            function resizeHandler() {
+                oCanvas.width = window.innerWidth;
+                oCanvas.height = window.innerHeight;
+                h_width = oCanvas.width/2;
+                draw();
+                if (p.x > oCanvas.width-250) {
+                    p.x = oCanvas.width-250;
+                    panel.style.left = p.x + 'px';
+                }
+                if (p.y > oCanvas.height-140) {
+                    p.y = oCanvas.height-140;
+                    panel.style.top = p.y + 'px';
+                }
+            }
+            window.onresize = resizeHandler;
+            
+            var heap1 = new LeftistHeap(function(a, b) {
+                return a.num - b.num;
+            }, function(key, elem) {
+                return key - elem.num;
+            }),
+                heap2 = new LeftistHeap(function(a, b) {
+                return a.num - b.num;
+            }, function(key, elem) {
+                return key - elem.num;
+            });
+            
+            resizeHandler();
+            
+            function updateW(elem, node) {
+                if (!node.left) {
+                    if (!node.right)
+                        elem.width = 1;
+                    else
+                        elem.width = node.right.element.width + 0.5;
+                } else {
+                    if (!node.right)
+                        elem.width = node.left.element.width + 0.5;
+                    else
+                        elem.width = node.left.element.width + node.right.element.width;
+                }
+            }
+            function updateP(elem, node) {
+                if (node.left) {
+                    elem.x += node.left.element.width - elem.width/2;
+                    node.left.element.x = elem.x - node.left.element.width/2;
+                    node.left.element.y = elem.y+1;
+                }
+                if (node.right) {
+                    if (!node.left)
+                        elem.x -= node.right.element.width - elem.width/2;
+                    node.right.element.x = elem.x + node.right.element.width/2;
+                    node.right.element.y = elem.y+1;
+                }
+            }
+            function drawNode(elem, node) {
+                ctx.save();
+                if (node.left) {
+                    ctx.beginPath();
+                    ctx.moveTo(h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                    ctx.lineTo(h_width+node.left.element.x*xunit, (0.5+node.left.element.y)*yunit);
+                    ctx.stroke();
+                }
+                if (node.right) {
+                    ctx.beginPath();
+                    ctx.moveTo(h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                    ctx.lineTo(h_width+node.right.element.x*xunit, (0.5+node.right.element.y)*yunit);
+                    ctx.stroke();
+                }
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(h_width+elem.x*xunit, (0.5+elem.y)*yunit,xunit/3,0,2*Math.PI);
+                ctx.stroke();
+                ctx.fillStyle="#fff";
+                ctx.fill();
+                ctx.fillStyle="#000";
+                ctx.textAlign = 'center';
+                ctx.textBaseline= 'middle';
+                ctx.font="14px Arial";
+                ctx.fillText(elem.num,h_width+elem.x*xunit, (0.5+elem.y)*yunit);
+                ctx.restore();
+            }
+            function insert(num, heap) {
+                heap.insert({
+                    num: num,
+                    width: 1,
+                    x: 0,
+                    y: 0
+                });
+            }
+            function del(heap) {
+                heap.delMin();
+            }
+            function update(heap) {
+                heap.postorder(updateW);
+                if (heap.top) {
+                    heap.top.element.x = 0;
+                    heap.top.element.y = 0;
+                }
+                heap.preorder(updateP);
+            }
+            function draw() {
+                ctx.clearRect(0,0,oCanvas.width,oCanvas.height);
+                var h1 = 0, h2 = 0;
+                if (heap1.top) {
+                    h1 = heap1.top.element.width * xunit / 2;
+                }
+                if (heap2.top) {
+                    h2 = heap2.top.element.width * xunit / 2;
+                }
+                h_width -= h2;
+                heap1.preorder(drawNode);
+                h_width += h2;
+                h_width += h1;
+                heap2.preorder(drawNode);
+                h_width -= h1;
+            }
+            
+            function clear(heap) {
+                heap.top = null;
+            }
+            function rand(heap) {
+                heap.top = null;
+                for (var i = 0; i < 20; i++) {
+                    var x = Math.floor(Math.random()*50);
+                    if (Math.random() < 0.7) {
+                        insert(x, heap);
+                    } else {
+                        del(heap);
+                    }
+                }
+            }
+            
+            var insert1 = document.getElementById('insert1'),
+                del1 = document.getElementById('del1'),
+                clear1 = document.getElementById('clear1'),
+                rand1 = document.getElementById('rand1'),
+                insert2 = document.getElementById('insert2'),
+                del2 = document.getElementById('del2'),
+                clear2 = document.getElementById('clear2'),
+                rand2 = document.getElementById('rand2'),
+                merge = document.getElementById('merge'),
+                val = document.getElementById('val');
+            insert1.onclick = function() {
+                var num = parseFloat(val.value);
+                if (!isNaN(num)) {
+                    insert(num, heap1);
+                    update(heap1);
+                    draw();
+                }
+            };
+            insert2.onclick = function() {
+                var num = parseFloat(val.value);
+                if (!isNaN(num)) {
+                    insert(num, heap2);
+                    update(heap2);
+                    draw();
+                }
+            };
+            del1.onclick = function() {
+                del(heap1);
+                update(heap1);
+                draw();
+            };
+            del2.onclick = function() {
+                del(heap2);
+                update(heap2);
+                draw();
+            };
+            clear1.onclick = function() {
+                clear(heap1);
+                draw();
+            };
+            clear2.onclick = function() {
+                clear(heap2);
+                draw();
+            };
+            rand1.onclick = function() {
+                rand(heap1);
+                update(heap1);
+                draw();
+            };
+            rand2.onclick = function() {
+                rand(heap2);
+                update(heap2);
+                draw();
+            };
+            merge.onclick = function(){
+                heap1.merge(heap2);
+                update(heap1);
+                draw();
+            };
+            
+            rand(heap1);
+            rand(heap2);
+            update(heap1);
+            update(heap2);
+            draw();
+        </script>
+    </body>
+</html>
